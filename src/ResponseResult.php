@@ -38,17 +38,17 @@ class ResponseResult
     {
         $body = $this->getBody();
         if (!is_array($body) || !isset($body['code'])) {
-            throw new \RuntimeException('Invalid response structure');
+            throw new \RuntimeException('RPC返回数据结构异常，缺少code: ' . $this->body);
         }
         if ($body['code'] !== 0) {
-            $msg = isset($body['message']) ? $body['message'] : 'Unknown error';
+            $msg = "[{$body['code']}] " . $body['message'] ?? 'Unknown error';
             if (isset($body['data']) && is_array($body['data'])) {
-                $msg .= ' | data: ' . json_encode($body['data'], JSON_UNESCAPED_UNICODE);
+                $msg .= ' | data: ' . $this->body;
             }
             throw new \RuntimeException($msg, $body['code']);
         }
-        if (!array_key_exists('data', $body) || !is_array($body['data'])) {
-            throw new \RuntimeException('Invalid response structure');
+        if (!array_key_exists('data', $body)) {
+            throw new \RuntimeException('RPC返回数据结构异常，缺少data: '  . $this->body);
         }
         return $body['data'];
     }

@@ -40,6 +40,9 @@ class FeignClient
         if (!$instance || empty($instance['ip']) || empty($instance['port'])) {
             throw new FeignClientException('No available instance for service: ' . $serviceName);
         }
+        if (!str_starts_with($path, '/')) {
+            $path = '/' . $path;
+        }
         $url = 'http://' . $instance['ip'] . ':' . $instance['port'] . $path;
         $client = new Client();
         $options = [
@@ -83,23 +86,23 @@ class FeignClient
         }
     }
 
-    public function get(string $path, array $params = [], array $headers = []): ResponseResult
+    public function get(string $path, array $params = [], array $headers = [])
     {
-        return $this->request($path, $params, null, 'GET', $headers);
+        return $this->request($path, $params, null, 'GET', $headers)->getData();
     }
 
-    public function post(string $path, $body = null, array $params = [], array $headers = []): ResponseResult
+    public function post(string $path, $body = null, array $params = [], array $headers = [])
     {
-        return $this->request($path, $params, $body, 'POST', $headers);
+        return $this->request($path, $params, $body, 'POST', $headers)->getData();
     }
 
-    public function put(string $path, $body = null, array $params = [], array $headers = []): ResponseResult
+    public function put(string $path, $body = null, array $params = [], array $headers = [])
     {
-        return $this->request($path, $params, $body, 'PUT', $headers);
+        return $this->request($path, $params, $body, 'PUT', $headers)->getData();
     }
 
-    public function delete(string $path, array $params = [], array $headers = []): ResponseResult
+    public function delete(string $path, array $params = [], array $headers = [])
     {
-        return $this->request($path, $params, null, 'DELETE', $headers);
+        return $this->request($path, $params, null, 'DELETE', $headers)->getData();
     }
 } 
