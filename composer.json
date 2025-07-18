@@ -1,0 +1,21 @@
+{
+    "name": "faysoft/feignphp",
+    "description": "通过nacos注册中心，调用spring cloud web服务",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "fayfox"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "laravel/framework": "^9.2",
+        "guzzlehttp/guzzle": "^7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Kuabound\\FeignPHP\\": "src/"
+        }
+    }
+} 
