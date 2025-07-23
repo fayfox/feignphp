@@ -41,7 +41,7 @@ class ResponseResult
             throw new \RuntimeException('RPC返回数据结构异常，缺少code: ' . $this->body);
         }
         if ($body['code'] !== 0) {
-            $msg = "[{$body['code']}] " . $body['message'] ?? 'Unknown error';
+            $msg = "[{$body['code']}] " . $body['msg'] ?? 'Unknown error';
             if (isset($body['data']) && is_array($body['data'])) {
                 $msg .= ' | data: ' . $this->body;
             }
