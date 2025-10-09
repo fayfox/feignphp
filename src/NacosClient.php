@@ -55,11 +55,6 @@ class NacosClient
         if (empty($hosts)) {
             return null;
         }
-//        $instance = $hosts[array_rand($hosts)];
-//        if (!isset($instance['ip']) || !isset($instance['port'])) {
-//            return null;
-//        }
-        // 替换原来的代码块（L58-L61）
         $instance = $this->weightedRandomSelect($hosts);
         if (!isset($instance['ip']) || !isset($instance['port'])) {
             return null;

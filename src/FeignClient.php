@@ -45,37 +45,43 @@ class FeignClient
         }
         $url = 'http://' . $instance['ip'] . ':' . $instance['port'] . $path;
 
-
-        // 添加traceparent
-        if (!isset($headers['traceparent']) || empty($headers['traceparent'])) {
-            // 检查是否存在 request_id
-            if (isset($headers['request_id']) && !empty($headers['request_id'])) {
-                $requestId = $headers['request_id'];
-                // 确保 requestId 至少有16个字符，否则用0补齐
-                if (strlen($requestId) >= 16) {
-                    $suffix = substr($requestId, -16);
+        $http_traceparent = $_SERVER['HTTP_TRACEPARENT'] ?? '';
+        // 添加request_id
+        if($http_traceparent){
+            $headers['traceparent'] = $http_traceparent;
+        }else{
+            // 添加traceparent
+            if (empty($headers['traceparent'])) {
+                // 检查是否存在 request_id
+                $requestId = $_SERVER['HTTP_X_REQUEST_ID'] ?? null;
+                if (!empty($requestId)) {
+                    // 确保 requestId 至少有16个字符，否则用0补齐
+                    if (strlen($requestId) >= 16) {
+                        $suffix = substr($requestId, -16);
+                    } else {
+                        $suffix = str_pad($requestId, 16, '0', STR_PAD_LEFT);
+                    }
+                    $headers['traceparent'] = "00-{$requestId}-{$suffix}-00";
                 } else {
-                    $suffix = str_pad($requestId, 16, '0', STR_PAD_LEFT);
-                }
-                $headers['traceparent'] = "00-{$requestId}-{$suffix}-00";
-            } else {
-                // 随机生成traceparent: version(2)-trace-id(32)-parent-id(16)-flags(2)
-                try {
-                    $hex32 = bin2hex(random_bytes(16));
-                    $hex16 = bin2hex(random_bytes(8));
-                    $headers['traceparent'] = "00-{$hex32}-{$hex16}-00";
-                } catch (\Exception $e) {
-                    // fallback机制：使用uniqid确保不会因随机数生成失败而中断
-                    $fallbackTraceId = str_pad(dechex(crc32(uniqid())), 32, '0', STR_PAD_LEFT);
-                    $fallbackParentId = str_pad(dechex(mt_rand()), 16, '0', STR_PAD_LEFT);
-                    $headers['traceparent'] = "00-{$fallbackTraceId}-{$fallbackParentId}-00";
-                } catch (\Error $e) {
-                    $fallbackTraceId = str_pad(dechex(crc32(uniqid())), 32, '0', STR_PAD_LEFT);
-                    $fallbackParentId = str_pad(dechex(mt_rand()), 16, '0', STR_PAD_LEFT);
-                    $headers['traceparent'] = "00-{$fallbackTraceId}-{$fallbackParentId}-00";
+                    // 随机生成traceparent: version(2)-trace-id(32)-parent-id(16)-flags(2)
+                    try {
+                        $hex32 = bin2hex(random_bytes(16));
+                        $hex16 = bin2hex(random_bytes(8));
+                        $headers['traceparent'] = "00-{$hex32}-{$hex16}-00";
+                    } catch (\Exception $e) {
+                        // fallback机制：使用uniqid确保不会因随机数生成失败而中断
+                        $fallbackTraceId = str_pad(dechex(crc32(uniqid())), 32, '0', STR_PAD_LEFT);
+                        $fallbackParentId = str_pad(dechex(mt_rand()), 16, '0', STR_PAD_LEFT);
+                        $headers['traceparent'] = "00-{$fallbackTraceId}-{$fallbackParentId}-00";
+                    } catch (\Error $e) {
+                        $fallbackTraceId = str_pad(dechex(crc32(uniqid())), 32, '0', STR_PAD_LEFT);
+                        $fallbackParentId = str_pad(dechex(mt_rand()), 16, '0', STR_PAD_LEFT);
+                        $headers['traceparent'] = "00-{$fallbackTraceId}-{$fallbackParentId}-00";
+                    }
                 }
             }
         }
+
 
         //租户id
         $kb_tenant_id = env('KB_TENANT_ID') ?? 0;
