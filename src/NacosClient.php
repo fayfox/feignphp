@@ -43,9 +43,10 @@ class NacosClient
             } else {
                 // 只缓存 ip+port
                 $hosts = array_values(array_filter(array_map(function($item) {
-                    return (isset($item['ip']) && isset($item['port'])) ? [
+                    return (isset($item['ip']) && isset($item['port']) && !empty($item['weight'])) ? [
                         'ip' => $item['ip'],
                         'port' => $item['port'],
+                        'weight' => $item['weight'],
                     ] : null;
                 }, $data['data'])));
                 Cache::put($cacheKey, $hosts, $this->cacheTtl);
@@ -54,15 +55,43 @@ class NacosClient
         if (empty($hosts)) {
             return null;
         }
-        $instance = $hosts[array_rand($hosts)];
+        $instance = $this->weightedRandomSelect($hosts);
         if (!isset($instance['ip']) || !isset($instance['port'])) {
             return null;
         }
+
         return [
             'ip' => $instance['ip'],
             'port' => $instance['port'],
         ];
     }
+
+    /**
+     * 根据权重加权随机选择实例
+     * @param array $hosts
+     * @return array|null
+     */
+    private function weightedRandomSelect(array $hosts): ?array
+    {
+        if (empty($hosts)) {
+            return null;
+        }
+
+        $totalWeight = array_sum(array_column($hosts, 'weight'));
+        $randomNumber = mt_rand(1, $totalWeight);
+
+        $currentWeight = 0;
+        foreach ($hosts as $host) {
+            $currentWeight += $host['weight'];
+            if ($randomNumber <= $currentWeight) {
+                return $host;
+            }
+        }
+
+        // fallback to first element
+        return $hosts[0];
+    }
+
 
     /**
      * 清除指定服务的缓存
