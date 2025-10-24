@@ -1,4 +1,5 @@
 <?php
+
 namespace Kuabound\FeignPHP;
 
 use GuzzleHttp\Client;
@@ -44,9 +45,9 @@ class FeignClient
 
         $http_traceparent = $_SERVER['HTTP_TRACEPARENT'] ?? '';
         // 添加request_id
-        if($http_traceparent){
+        if ($http_traceparent) {
             $headers['traceparent'] = $http_traceparent;
-        }else{
+        } else {
             // 添加traceparent
             if (empty($headers['traceparent'])) {
                 // 检查是否存在 request_id
@@ -82,7 +83,7 @@ class FeignClient
 
         //租户id
         $kb_tenant_id = env('KB_TENANT_ID') ?? 0;
-        if($kb_tenant_id){
+        if ($kb_tenant_id) {
             $headers['Kb-Tenant-Id'] = $kb_tenant_id;
         }
 
@@ -128,22 +129,22 @@ class FeignClient
         }
     }
 
-    public function get(string $path, array $params = [], array $headers = []): ResponseResult
+    public function get(string $path, array $params = [], array $headers = []): array
     {
         return $this->request($path, $params, null, 'GET', $headers)->getData();
     }
 
-    public function post(string $path, $body = null, array $params = [], array $headers = []): ResponseResult
+    public function post(string $path, $body = null, array $params = [], array $headers = []): array
     {
         return $this->request($path, $params, $body, 'POST', $headers)->getData();
     }
 
-    public function put(string $path, $body = null, array $params = [], array $headers = []): ResponseResult
+    public function put(string $path, $body = null, array $params = [], array $headers = []): array
     {
         return $this->request($path, $params, $body, 'PUT', $headers)->getData();
     }
 
-    public function delete(string $path, array $params = [], array $headers = []): ResponseResult
+    public function delete(string $path, array $params = [], array $headers = []): array
     {
         return $this->request($path, $params, null, 'DELETE', $headers)->getData();
     }
