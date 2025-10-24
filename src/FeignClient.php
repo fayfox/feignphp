@@ -3,9 +3,6 @@ namespace Kuabound\FeignPHP;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Kuabound\FeignPHP\NacosClient;
-use Kuabound\FeignPHP\ResponseResult;
-use Kuabound\FeignPHP\FeignClientException;
 
 class FeignClient
 {
@@ -131,22 +128,22 @@ class FeignClient
         }
     }
 
-    public function get(string $path, array $params = [], array $headers = [])
+    public function get(string $path, array $params = [], array $headers = []): ResponseResult
     {
         return $this->request($path, $params, null, 'GET', $headers)->getData();
     }
 
-    public function post(string $path, $body = null, array $params = [], array $headers = [])
+    public function post(string $path, $body = null, array $params = [], array $headers = []): ResponseResult
     {
         return $this->request($path, $params, $body, 'POST', $headers)->getData();
     }
 
-    public function put(string $path, $body = null, array $params = [], array $headers = [])
+    public function put(string $path, $body = null, array $params = [], array $headers = []): ResponseResult
     {
         return $this->request($path, $params, $body, 'PUT', $headers)->getData();
     }
 
-    public function delete(string $path, array $params = [], array $headers = [])
+    public function delete(string $path, array $params = [], array $headers = []): ResponseResult
     {
         return $this->request($path, $params, null, 'DELETE', $headers)->getData();
     }
