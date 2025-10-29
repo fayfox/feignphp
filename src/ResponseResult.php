@@ -48,7 +48,11 @@ class ResponseResult
         if ($body['code'] !== 0) {
             switch ($body['code']) {
                 case 400:
-                    throw new BadRequestException($body['msg']);
+                    $msg = $body['msg'];
+                    if (!empty($this->headers['Kuabound-Debug'])) {
+                        $msg .= ": {$this->headers['Kuabound-Debug'][0]}";
+                    }
+                    throw new BadRequestException($msg);
                 case 403:
                     throw new PermissionDeniedException($body['msg']);
                 case 404:
