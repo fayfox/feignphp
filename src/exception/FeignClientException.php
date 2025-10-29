@@ -1,4 +1,4 @@
 <?php
-namespace Kuabound\FeignPHP;
+namespace Kuabound\FeignPHP\exception;
 
 class FeignClientException extends \RuntimeException {} 
