@@ -116,22 +116,22 @@ class FeignClient
         }
     }
 
-    public function get(string $path, array $params = [], array $headers = []): array
+    public function get(string $path, array $params = [], array $headers = []): mixed
     {
         return $this->request($path, $params, null, 'GET', $headers)->getData();
     }
 
-    public function post(string $path, $body = null, array $params = [], array $headers = []): array
+    public function post(string $path, $body = null, array $params = [], array $headers = []): mixed
     {
         return $this->request($path, $params, $body, 'POST', $headers)->getData();
     }
 
-    public function put(string $path, $body = null, array $params = [], array $headers = []): array
+    public function put(string $path, $body = null, array $params = [], array $headers = []): mixed
     {
         return $this->request($path, $params, $body, 'PUT', $headers)->getData();
     }
 
-    public function delete(string $path, array $params = [], array $headers = []): array
+    public function delete(string $path, array $params = [], array $headers = []): mixed
     {
         return $this->request($path, $params, null, 'DELETE', $headers)->getData();
     }
