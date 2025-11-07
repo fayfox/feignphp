@@ -1,8 +1,8 @@
 <?php
 namespace Kuabound\FeignPHP;
 
-use Illuminate\Support\Facades\Cache;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Cache;
 
 class NacosClient
 {
@@ -78,6 +78,10 @@ class NacosClient
         }
 
         $totalWeight = array_sum(array_column($hosts, 'weight'));
+        if ($totalWeight < 1) {
+            // 无可用实例
+            return null;
+        }
         $randomNumber = mt_rand(1, $totalWeight);
 
         $currentWeight = 0;
@@ -88,7 +92,7 @@ class NacosClient
             }
         }
 
-        // fallback to first element
+        // fallback to the first element
         return $hosts[0];
     }
 
