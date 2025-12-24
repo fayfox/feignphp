@@ -131,8 +131,8 @@ class FeignClient
         return $this->request($path, $params, $body, 'PUT', $headers)->getData();
     }
 
-    public function delete(string $path, array $params = [], array $headers = []): mixed
+    public function delete(string $path, $body = null, array $params = [], array $headers = []): mixed
     {
-        return $this->request($path, $params, null, 'DELETE', $headers)->getData();
+        return $this->request($path, $params, $body, 'DELETE', $headers)->getData();
     }
 } 
