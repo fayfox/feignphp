@@ -11,6 +11,7 @@ class FeignClient
     private NacosClient $nacosClient;
     private string $serviceName;
     private static ?NacosClient $sharedNacosClient = null;
+    private Client $httpClient;
 
     public function __construct(string $serviceName)
     {
@@ -19,6 +20,11 @@ class FeignClient
         }
         $this->nacosClient = self::$sharedNacosClient;
         $this->serviceName = $serviceName;
+        $this->httpClient = new Client([
+            'timeout' => 30,
+            'connect_timeout' => 2,
+            'proxy' => '',
+        ]);
     }
 
     /**
@@ -74,7 +80,6 @@ class FeignClient
             $headers['Kb-Tenant-Id'] = $kb_tenant_id;
         }
 
-        $client = new Client();
         $options = [
             'headers' => $headers,
             'http_errors' => false,
@@ -88,7 +93,7 @@ class FeignClient
             }
         }
         try {
-            $response = $client->request(strtoupper($method), $url, $options);
+            $response = $this->httpClient->request(strtoupper($method), $url, $options);
             $status = $response->getStatusCode();
             if ($status < 200 || $status >= 300) {
                 // 有 HTTP 返回但非 2xx，直接报错

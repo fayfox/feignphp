@@ -15,7 +15,11 @@ class NacosClient
     {
         $this->nacosAddr = getenv('NACOS_ADDR') ?: '127.0.0.1:8848';
         $this->namespaceId = getenv('NACOS_NAMESPACE_ID') ?: 'public';
-        $this->httpClient = new Client();
+        $this->httpClient = new Client([
+            'timeout' => 2,
+            'connect_timeout' => 2,
+            'proxy' => '',
+        ]);
         $this->cacheTtl = 600; // 默认缓存秒数
     }
 
