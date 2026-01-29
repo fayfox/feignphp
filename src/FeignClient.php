@@ -109,7 +109,7 @@ class FeignClient
             }
             $url = 'http://' . $instance['ip'] . ':' . $instance['port'] . $path;
             try {
-                $response = $client->request(strtoupper($method), $url, $options);
+                $response = $this->httpClient->request(strtoupper($method), $url, $options);
                 $status = $response->getStatusCode();
                 if ($status < 200 || $status >= 300) {
                     throw new FeignClientException("HTTP request failed with status $status");
