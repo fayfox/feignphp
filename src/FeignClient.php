@@ -75,9 +75,13 @@ class FeignClient
         }
 
         //租户id
-        $kb_tenant_id = env('KB_TENANT_ID') ?? 0;
-        if ($kb_tenant_id) {
-            $headers['Kb-Tenant-Id'] = $kb_tenant_id;
+        try {
+            $kb_tenant_id = env('KB_TENANT_ID', 0);
+            if ($kb_tenant_id) {
+                $headers['Kb-Tenant-Id'] = $kb_tenant_id;
+            }
+        } catch (\Throwable $e) {
+            // 拿不到就算了
         }
 
         $options = [

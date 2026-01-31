@@ -1,7 +1,11 @@
 <?php
+
 namespace Kuabound\FeignPHP;
 
 use GuzzleHttp\Client;
+use Illuminate\Cache\CacheManager;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
 
 class NacosClient
@@ -9,6 +13,8 @@ class NacosClient
     private string $nacosAddr;
     private string $namespaceId;
     private Client $httpClient;
+
+    private Repository $cache;
     private int $cacheTtl;
 
     public function __construct()
@@ -21,6 +27,26 @@ class NacosClient
             'proxy' => '',
         ]);
         $this->cacheTtl = 600; // 默认缓存秒数
+
+        if ($this->isFacadeAvailable()) {
+            // laravel环境下，使用laravel的cache
+            $this->cache = Cache::store();
+        } else {
+            // 非laravel环境，自己new一个
+            $container = new Container();
+            $container['config'] = [
+                'cache.default' => 'file',
+                'cache.stores.file' => [
+                    'driver' => 'file',
+                    'path' => defined('BASE_PATH') ? BASE_PATH . '/runtimes/cache/project' : __DIR__ . '/storage/cache',
+                ],
+                'cache.prefix' => 'app_',
+            ];
+
+            $cacheManager = new CacheManager($container);
+
+            $this->cache = $cacheManager->store();
+        }
     }
 
     /**
@@ -31,7 +57,7 @@ class NacosClient
     public function getServiceInstance(string $serviceName): ?array
     {
         $cacheKey = 'nacos_service_' . md5($serviceName . $this->namespaceId);
-        $hosts = Cache::get($cacheKey);
+        $hosts = $this->cache->get($cacheKey);
         if (empty($hosts)) {
             // 缓存无数据，实时查询 nacos
             $url = sprintf(
@@ -46,14 +72,14 @@ class NacosClient
                 $hosts = [];
             } else {
                 // 只缓存 ip+port
-                $hosts = array_values(array_filter(array_map(function($item) {
+                $hosts = array_values(array_filter(array_map(function ($item) {
                     return (isset($item['ip']) && isset($item['port']) && !empty($item['weight'])) ? [
                         'ip' => $item['ip'],
                         'port' => $item['port'],
                         'weight' => $item['weight'],
                     ] : null;
                 }, $data['data'])));
-                Cache::put($cacheKey, $hosts, $this->cacheTtl);
+                $this->cache->put($cacheKey, $hosts, $this->cacheTtl);
             }
         }
         if (empty($hosts)) {
@@ -108,6 +134,24 @@ class NacosClient
     public function clearServiceCache(string $serviceName): void
     {
         $cacheKey = 'nacos_service_' . md5($serviceName . $this->namespaceId);
-        Cache::forget($cacheKey);
+        $this->cache->forget($cacheKey);
+    }
+
+    /**
+     * 检查 Facade 是否已初始化
+     */
+    private function isFacadeAvailable(): bool
+    {
+        try {
+            // 尝试获取 Facade 的实例
+            $instance = Cache::getFacadeRoot();
+            return $instance !== null;
+        } catch (\RuntimeException $e) {
+            // 捕获 "A facade root has not been set" 异常
+            if (str_contains($e->getMessage(), 'facade root has not been set')) {
+                return false;
+            }
+            throw $e;
+        }
     }
 } 
