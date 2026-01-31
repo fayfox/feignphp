@@ -76,7 +76,7 @@ class FeignClient
 
         //租户id
         try {
-            $kb_tenant_id = env('KB_TENANT_ID', 0);
+            $kb_tenant_id = !empty($_ENV['KB_TENANT_ID']) ? $_ENV['KB_TENANT_ID'] : env('KB_TENANT_ID', 0);
             if ($kb_tenant_id) {
                 $headers['Kb-Tenant-Id'] = $kb_tenant_id;
             }
