@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Cache;
 
 class NacosClient
@@ -42,6 +43,8 @@ class NacosClient
                 ],
                 'cache.prefix' => 'app_',
             ];
+
+            $container['files'] = new Filesystem();
 
             $cacheManager = new CacheManager($container);
 
