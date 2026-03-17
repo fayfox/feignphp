@@ -120,7 +120,7 @@ class FeignClient
                 }
                 return new ResponseResult($status, $response->getBody()->getContents(), $response->getHeaders());
             } catch (GuzzleException $e) {
-                return new ResponseResult(null, null, [], $e->getMessage());
+                return new ResponseResult(null, null, [], $e->getMessage(), $e);
             }
         }
     }

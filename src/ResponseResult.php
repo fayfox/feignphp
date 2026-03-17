@@ -12,13 +12,15 @@ class ResponseResult
     public $body;
     public array $headers;
     public ?string $error;
+    public ?\Throwable $exception;
 
-    public function __construct(?int $status, $body, array $headers, ?string $error = null)
+    public function __construct(?int $status, $body, array $headers, ?string $error = null, ?\Throwable $exception = null)
     {
         $this->status = $status;
         $this->body = $body;
         $this->headers = $headers;
         $this->error = $error;
+        $this->exception = $exception;
     }
 
     public function isSuccess(): bool
@@ -62,7 +64,7 @@ class ResponseResult
                     if (isset($body['data']) && is_array($body['data'])) {
                         $msg .= ' | data: ' . $this->body;
                     }
-                    throw new ServerException($msg, $body['code']);
+                    throw new ServerException($msg, $body['code'], $this->exception);
             }
         }
         if (!array_key_exists('data', $body)) {
