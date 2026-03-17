@@ -27,7 +27,10 @@ class NacosClient
             'connect_timeout' => 2,
             'proxy' => '',
         ]);
-        $this->cacheTtl = 600; // 默认缓存秒数
+        // 默认缓存秒数
+        // 不能缓存太久，这边毕竟无法监听nacos状态，缓存过长，可能会请求期间java项目下线，导致报错
+        // java项目从nacos下线后，会继续提供服务10秒
+        $this->cacheTtl = 5;
 
         if ($this->isFacadeAvailable()) {
             // laravel环境下，使用laravel的cache
