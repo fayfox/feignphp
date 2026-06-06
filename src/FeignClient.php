@@ -22,7 +22,7 @@ class FeignClient
         $this->serviceName = $serviceName;
         $this->httpClient = new Client([
             'timeout' => 30,
-            'connect_timeout' => 2,
+            'connect_timeout' => 30,
             'proxy' => '',
         ]);
     }
