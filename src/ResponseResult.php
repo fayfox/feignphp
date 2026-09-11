@@ -5,6 +5,7 @@ use Kuabound\FeignPHP\exception\BadRequestException;
 use Kuabound\FeignPHP\exception\NotFoundException;
 use Kuabound\FeignPHP\exception\PermissionDeniedException;
 use Kuabound\FeignPHP\exception\ServerException;
+use Kuabound\FeignPHP\exception\ThirdPartyException;
 
 class ResponseResult
 {
@@ -59,6 +60,8 @@ class ResponseResult
                     throw new PermissionDeniedException($body['msg']);
                 case 404:
                     throw new NotFoundException($body['msg']);
+                case 1000:
+                    throw new ThirdPartyException($body['msg']);
                 default:
                     $msg = "[{$body['code']}] " . $body['msg'] ?? 'Unknown error';
                     if (isset($body['data']) && is_array($body['data'])) {
