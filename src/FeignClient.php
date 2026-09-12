@@ -84,6 +84,11 @@ class FeignClient
             // 拿不到就算了
         }
 
+        // 多语言
+        if (isset($_SERVER['HTTP_LANG'])) {
+            $headers['Kb-Language'] = $_SERVER['HTTP_LANG'];
+        }
+
         $options = [
             'headers' => $headers,
             'http_errors' => false,
