@@ -101,6 +101,7 @@ class FeignClient
                 $options['body'] = $body;
             }
         }
+        $startTime = microtime(true);
         try {
             $response = $this->httpClient->request(strtoupper($method), $url, $options);
             $status = $response->getStatusCode();
@@ -110,6 +111,10 @@ class FeignClient
             }
             return new ResponseResult($status, $response->getBody()->getContents(), $response->getHeaders());
         } catch (GuzzleException $e) {
+            // 第一次请求超过 5 秒（超时等）不再重试，避免加倍等待
+            if ((microtime(true) - $startTime) > 5) {
+                return new ResponseResult(null, null, [], $e->getMessage(), $e);
+            }
             // 网络异常等才清缓存重试
             $this->nacosClient->clearServiceCache($serviceName);
             $instance = $this->nacosClient->getServiceInstance($serviceName);
