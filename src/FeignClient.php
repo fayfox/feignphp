@@ -79,6 +79,11 @@ class FeignClient
             $kb_tenant_id = !empty($_ENV['KB_TENANT_ID']) ? $_ENV['KB_TENANT_ID'] : env('KB_TENANT_ID', 0);
             if ($kb_tenant_id) {
                 $headers['Kb-Tenant-Id'] = $kb_tenant_id;
+            } else {
+                $tenantIdByHost = TenantContext::get();
+                if ($tenantIdByHost) {
+                    $headers['Kb-Tenant-Id'] = $tenantIdByHost;
+                }
             }
         } catch (\Throwable $e) {
             // 拿不到就算了

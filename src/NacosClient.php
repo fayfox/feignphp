@@ -3,11 +3,7 @@
 namespace Kuabound\FeignPHP;
 
 use GuzzleHttp\Client;
-use Illuminate\Cache\CacheManager;
-use Illuminate\Container\Container;
 use Illuminate\Contracts\Cache\Repository;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Cache;
 
 class NacosClient
 {
@@ -31,28 +27,7 @@ class NacosClient
         // 不能缓存太久，这边毕竟无法监听nacos状态，缓存过长，可能会请求期间java项目下线，导致报错
         // java项目从nacos下线后，会继续提供服务10秒
         $this->cacheTtl = 5;
-
-        if ($this->isFacadeAvailable()) {
-            // laravel环境下，使用laravel的cache
-            $this->cache = Cache::store();
-        } else {
-            // 非laravel环境，自己new一个
-            $container = new Container();
-            $container['config'] = [
-                'cache.default' => 'file',
-                'cache.stores.file' => [
-                    'driver' => 'file',
-                    'path' => defined('BASE_PATH') ? BASE_PATH . '/runtimes/cache/project' : __DIR__ . '/storage/cache',
-                ],
-                'cache.prefix' => 'app_',
-            ];
-
-            $container['files'] = new Filesystem();
-
-            $cacheManager = new CacheManager($container);
-
-            $this->cache = $cacheManager->store();
-        }
+        $this->cache = CacheFactory::get();
     }
 
     /**
@@ -141,23 +116,5 @@ class NacosClient
     {
         $cacheKey = 'nacos_service_' . md5($serviceName . $this->namespaceId);
         $this->cache->forget($cacheKey);
-    }
-
-    /**
-     * 检查 Facade 是否已初始化
-     */
-    private function isFacadeAvailable(): bool
-    {
-        try {
-            // 尝试获取 Facade 的实例
-            $instance = Cache::getFacadeRoot();
-            return $instance !== null;
-        } catch (\RuntimeException $e) {
-            // 捕获 "A facade root has not been set" 异常
-            if (str_contains($e->getMessage(), 'facade root has not been set')) {
-                return false;
-            }
-            throw $e;
-        }
     }
 } 
