@@ -9,7 +9,7 @@ class TenantRpcService
 {
     public static function domainToTenantId(string $domain): ?int
     {
-        return self::getClient()->get("/domain/{$domain}/toTenantId");
+        return self::getClient()->get("tenant/domain/{$domain}/toTenantId");
     }
 
     private static function getClient(): FeignClient
