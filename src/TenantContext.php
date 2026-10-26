@@ -12,8 +12,16 @@ class TenantContext
      */
     private const CACHE_TTL = 300;
 
+    /**
+     * 解析域名租户时会再发 Feign 请求，请求里又会读租户，这里挡住重入
+     */
+    private static bool $resolving = false;
+
     public static function get(): ?int
     {
+        if (self::$resolving) {
+            return null;
+        }
         $host = $_SERVER['HTTP_HOST'] ?? '';
         if ($host === '') {
             return null;
@@ -25,10 +33,17 @@ class TenantContext
             return (int) $tenantId;
         }
 
-        $tenantId = TenantRpcService::domainToTenantId($host);
+        self::$resolving = true;
+        try {
+            $tenantId = TenantRpcService::domainToTenantId($host);
+        } catch (\Throwable $e) {
+            return null;
+        } finally {
+            self::$resolving = false;
+        }
         if ($tenantId) {
             CacheFactory::get()->put($cacheKey, $tenantId, self::CACHE_TTL);
         }
-        return $tenantId === null ? null : $tenantId;
+        return $tenantId === null ? null : (int) $tenantId;
     }
 }
