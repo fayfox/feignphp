@@ -75,18 +75,20 @@ class FeignClient
         }
 
         //租户id
-        try {
-            $kb_tenant_id = !empty($_ENV['KB_TENANT_ID']) ? $_ENV['KB_TENANT_ID'] : env('KB_TENANT_ID', 0);
-            if ($kb_tenant_id) {
-                $headers['Kb-Tenant-Id'] = $kb_tenant_id;
-            } else {
-                $tenantIdByHost = TenantContext::get();
-                if ($tenantIdByHost) {
-                    $headers['Kb-Tenant-Id'] = $tenantIdByHost;
+        if (!isset($headers['Kb-Tenant-Id'])) {
+            try {
+                $kb_tenant_id = !empty($_ENV['KB_TENANT_ID']) ? $_ENV['KB_TENANT_ID'] : env('KB_TENANT_ID', 0);
+                if ($kb_tenant_id) {
+                    $headers['Kb-Tenant-Id'] = $kb_tenant_id;
+                } else {
+                    $tenantIdByHost = TenantContext::get();
+                    if ($tenantIdByHost) {
+                        $headers['Kb-Tenant-Id'] = $tenantIdByHost;
+                    }
                 }
+            } catch (\Throwable $e) {
+                // 拿不到就算了
             }
-        } catch (\Throwable $e) {
-            // 拿不到就算了
         }
 
         // 多语言
