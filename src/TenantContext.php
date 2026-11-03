@@ -17,14 +17,14 @@ class TenantContext
      */
     private static bool $resolving = false;
 
-    public static function get(): ?int
+    public static function get(?int $default = null): ?int
     {
         if (self::$resolving) {
             return null;
         }
         $host = $_SERVER['HTTP_HOST'] ?? '';
         if ($host === '') {
-            return null;
+            return $default;
         }
 
         $cacheKey = 'tenant_domain_' . md5($host);
@@ -37,13 +37,13 @@ class TenantContext
         try {
             $tenantId = TenantRpcService::domainToTenantId($host);
         } catch (\Throwable $e) {
-            return null;
+            return $default;
         } finally {
             self::$resolving = false;
         }
         if ($tenantId) {
             CacheFactory::get()->put($cacheKey, $tenantId, self::CACHE_TTL);
         }
-        return $tenantId === null ? null : (int) $tenantId;
+        return $tenantId === null ? $default : $tenantId;
     }
 }
